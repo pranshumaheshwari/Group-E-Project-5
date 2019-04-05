@@ -65,8 +65,26 @@ acc = ini_acc;
     alti = min(alti, 6e5); % Since igrfmagm has a limit on altitude of 6e5
     
     [mag_field_vector1,hor_intensity,declination,inclination,total_intensity] = igrfmagm(alti,lat,long,decyear(2015,7,4),12); % igrfmagm used to calculate the magnetic feild of earth at particular position
-    mag_field_vector = mag_field_vector1 * 1e-9; % in T Since the function returns the value in nT
-    mag_field_vector = mag_field_vector.'; % Taking transpose of the magnetic feild
+    mag_field_vector2 = mag_field_vector1 * 1e-9; % in T Since the function returns the value in nT
+    mag_field_vector2 = mag_field_vector2.'; % Taking transpose of the magnetic feild
+    
+    % Changing frame of reference of Magnetic Feild from GCI to Satellite Body
+    if i == 1
+%       Initialize with values = 0
+        theta_x = 0; % in rad
+        theta_y = 0; % in rad
+        theta_z = 0; % in rad
+    else 
+        theta_x = theta_x + (cangi(1) * dt)+(0.5 * angacc(1) * dt^2); % in rad Since Change in angle = Angular Velocity * dt + 0.5 * Angular Accelaration * dt^2
+        theta_y = theta_y + (cangi(2) * dt)+(0.5 * angacc(2) * dt^2); % in rad Since Change in angle = Angular Velocity * dt + 0.5 * Angular Accelaration * dt^2
+        theta_z = theta_z + (cangi(3) * dt)+(0.5 * angacc(3) * dt^2); % in rad Since Change in angle = Angular Velocity * dt + 0.5 * Angular Accelaration * dt^2
+
+    end
+
+    rx = [1,0,0;0,cos(theta_x),-sin(theta_x);0,sin(theta_x),cos(theta_x)]; % Rotation Matrix Rx
+    ry = [cos(theta_y),0,sin(theta_y);0,1,0;-sin(theta_y),0,cos(theta_y)]; % Rotation Matrix Ry
+    rz = [cos(theta_z),-sin(theta_z),0;sin(theta_z),cos(theta_z),0;0,0,1]; % Rotation Matrix Rz
+    mag_field_vector = rx * ry * rz * mag_field_vector2; % Since Rotation vector R = Rx*Ry*Rz
     
 %% B-dot
 %   Determinant of Magnetic Feild
