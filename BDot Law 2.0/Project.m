@@ -2,17 +2,17 @@ clear all;
 clc;
 
 %% Specify time
-dt = 0.32; T = 90*60*3;
+dt = 0.32; T = 90*60*300;
 
 t = 0:dt:T;
 %% Initializations
 % The inertia vector of satellite
-    inertia = [6400,-76.4,-25.6;-76.4,4730,-40;-25.6,-40,8160]' * 1e-7; % in kg*m^2
+    inertia = [6400,-76.4,-25.6;-76.4,4730,-40;-25.6,-40,8160]'; % in kg*m^2
 % The initial position and velocity of satellite in Earth-Centered Earth-Fixed    
     ini_pos = [1029.7743e3;6699.3469e3;3.7896e3]'; % in m
-    ini_vel = [6.2119e3;0.9524e3;4.3946e3]'; % in m/s
+    ini_vel = [-6.2119e3;0.9524e3;4.3946e3]'; % in m/s
 % Initial angular velocity and angular acceleration of satellite
-    cang = [0.1;0.1;0.1]'; % rad/s
+    cang = [0.01;0.01;0.01]'; % rad/s
     angacc = [0;0;0]'; % rad/s^2
 % Constants
     G = 6.67428e-11; % Earth gravitational constant in m^3/kg*s^2
@@ -76,7 +76,9 @@ acc = ini_acc;
 %   Torque
         vtorque = cross(m, mag_field_vector); % in N*m Since T = m x B
 %   Angular Accelaration of Satellite
-        angacc = vtorque * inv(inertia); % in rad/s^2 Since I x angacc = T
+        angacc(1) = (vtorque(1) - ((inertia(3, :) - inertia(2, :)) * cang(2) * cang(3))) / inertia(1,:); % in rad/s^2 Since I1 x angacc1 + (I3 - I2)w2w3  = T1
+        angacc(2) = (vtorque(2) - ((inertia(1, :) - inertia(3, :)) * cang(3) * cang(1))) / inertia(2,:); % in rad/s^2 Since I2 x angacc2 + (I1 - I3)w3w1  = T2
+        angacc(3) = (vtorque(2) - ((inertia(2, :) - inertia(1, :)) * cang(1) * cang(2))) / inertia(3,:); % in rad/s^2 Since I3 x angacc3 + (I2 - I1)w1w2  = T3
 %% Updating loop values
 
     cang = cangi + (angacc * dt); % calculates the new angular velocity
