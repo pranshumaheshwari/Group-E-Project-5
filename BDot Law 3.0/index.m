@@ -11,14 +11,14 @@ mu=398600.64;
 
 % Inertia
 in=[6400 -76.4 -25.6;-76.4 4730 -40;-25.6 -40 8160];
-[vv,prin_mom]=eig(in);min_prin_mom=min(diag(prin_mom));
+[vv,prin_mom]=eig(in);
+min_prin_mom=min(diag(prin_mom));
 
 % TRMM Spacecraft (Use ecc=0)
 tlef='tle.txt';tsat ='TRMM';
 sat=mytle(tlef,tsat,mu);
 yr=sat.epoch(1);mth=sat.epoch(2);day=sat.epoch(3);hr=sat.epoch(4);minute=sat.epoch(5);sec=sat.epoch(6);
-a=sat.oe(1);ecc=sat.oe(2)*0;inc=sat.oe(3)*pi/180;big_omega=sat.oe(4)*pi/180;w=sat.oe(5)*pi/180;big_m=sat.oe(6)*pi/180;
-b_star=sat.bStar;b_coef=1/(12.741621*b_star);
+a=sat.oe(1);ecc=sat.oe(2)*0;inc=sat.oe(3)*pi/180;big_omega=sat.oe(4)*pi/180;w=sat.oe(5)*pi/180;big_m=sat.oe(6)*pi/180;orb_per=sat.oe(7);
 
 % Solve Kepler's Equation
 % Initial Guess for Eccentric Anomaly
@@ -56,9 +56,6 @@ x=zeros(m,7);u=zeros(m,3);command_dipole=zeros(m,3);
 q0=[sqrt(2)/2;0;0;sqrt(2)/2];
 w0=[0.01;0.01;0.01];
 x(1,:)=[q0' w0'];
-
-% Orbit Period
-orb_per=2*pi/sqrt(mu)*(norm(r0)^(3/2));
 
 % Get Orbit
 for i=1:m-1     
