@@ -415,14 +415,6 @@ function [lat,long,height]=ecef2llh(r_ecef)
 %     long = longitude in degrees (m x 1)
 %   height = height in meters (m x 1)
 
-% John L. Crassidis 6/7/06
-
-% This program uses a closed-form solution, which is valid as long as
-% does not fall within 43 km of the Earth center. Details can be found at:
-% Zhu, J., "Exact Conversion of Earth-Centered-Earth-Fixed Coordinates to 
-% Geodetic Coordinates," Journal of Guidance, Control and Dynamics, 
-% Vol. 16, No. 2, March-April 1993, pp. 389-391.
-
 % Check Size of Input Vector
 rad2deg=180/pi;
 [mout,mout1]=size(r_ecef);
@@ -485,7 +477,6 @@ function r_ecef=llh2ecef(lat,long,height)
 %  The output is:
 %   r_ecef = ECEF quantities in km (m x 3)
 
-% John L. Crassidis 6/7/06
 
 deg2rad=pi/180;
 
@@ -534,7 +525,6 @@ function r_eci=ecef2eci(r_ecef,yr,mth,day,hr,min,sec)
 %  The output is:
 %     r_eci= ECEF quantities (m x 3)
 
-% John L. Crassidis 6/7/06
 
 % Sidereal Time is Computed using Eq. (12.4) from Meeus, J., 
 % Astronomical Algorithms, 2nd Edition, Willmann-Bell, Inc., 
@@ -584,12 +574,6 @@ function r_ecef=eci2ecef(r_eci,yr,mth,day,hr,min,sec)
 %  The output is:
 %   r_ecef = ECEF quantities (m x 3)
 
-% John L. Crassidis 6/7/06
-
-% Sidereal Time is Computed using Eq. (12.4) from Meeus, J., 
-% Astronomical Algorithms, 2nd Edition, Willmann-Bell, Inc., 
-% Richmond, VA, 1998.
-
 % Check Size of Input Vector
 [mout,mout1]=size(r_eci);
 if mout1 ~= 3
@@ -632,12 +616,6 @@ function theta=sidereal(yr,mth,day,hr,min,sec)
 %
 %  The output is:
 %    theta = sidereal time in degrees (m x 3)
-
-% John L. Crassidis 6/7/06
-
-% Sidereal Time is Computed using Eq. (12.4) from Meeus, J., 
-% Astronomical Algorithms, 2nd Edition, Willmann-Bell, Inc., 
-% Richmond, VA, 1998.
 
 
 % Compute Day-of-Year
