@@ -8,6 +8,7 @@ function att=attm(q)
 %
 %  The output as:
 %     att = attitude matrix (3x3)
+%  Sec 2.9.3
 
 q=q(:)';
 a1=q(:,1).^2-q(:,2).^2-q(:,3).^2+q(:,4).^2;

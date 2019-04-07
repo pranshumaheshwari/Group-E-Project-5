@@ -17,8 +17,19 @@ min_prin_mom=min(diag(prin_mom));
 % TRMM Spacecraft (Use ecc=0)
 tlef='tle.txt';tsat ='TRMM';
 sat=mytle(tlef,tsat,mu);
-yr=sat.epoch(1);mth=sat.epoch(2);day=sat.epoch(3);hr=sat.epoch(4);minute=sat.epoch(5);sec=sat.epoch(6);
-a=sat.oe(1);ecc=sat.oe(2)*0;inc=sat.oe(3)*pi/180;big_omega=sat.oe(4)*pi/180;w=sat.oe(5)*pi/180;big_m=sat.oe(6)*pi/180;orb_per=sat.oe(7);
+yr=sat.epoch(1);
+mth=sat.epoch(2);
+day=sat.epoch(3);
+hr=sat.epoch(4);
+minute=sat.epoch(5);
+sec=sat.epoch(6);
+a=sat.oe(1);
+ecc=sat.oe(2)*0;
+inc=sat.oe(3)*pi/180;
+big_omega=sat.oe(4)*pi/180;
+w=sat.oe(5)*pi/180;
+big_m=sat.oe(6)*pi/180;
+orb_per=sat.oe(7);
 
 % Solve Kepler's Equation
 % Initial Guess for Eccentric Anomaly
@@ -33,18 +44,20 @@ while abs(delta_e) > eps
   if count == max_iter, break, disp(' Maximum Number of Iterations Achieved'), end
 end
 
-% Get Initial Position and Velocity
-rmag=a*(1-ecc*cos(big_e));
-rp=a*(cos(big_e)-ecc);rq=a*sqrt(1-ecc^2)*sin(big_e);
-vp=-sqrt(mu*a)/rmag*sin(big_e);vq=sqrt(mu*a*(1-ecc^2))/rmag*cos(big_e);
-c11=cos(big_omega)*cos(w)-sin(big_omega)*sin(w)*cos(inc);
-c12=-cos(big_omega)*sin(w)-sin(big_omega)*cos(w)*cos(inc);
-c21=sin(big_omega)*cos(w)+cos(big_omega)*sin(w)*cos(inc);
-c22=-sin(big_omega)*sin(w)+cos(big_omega)*cos(w)*cos(inc);
-c31=sin(w)*sin(inc);
-c32=cos(w)*sin(inc);
-r1=c11*rp+c12*rq;r2=c21*rp+c22*rq;r3=c31*rp+c32*rq;
-v1=c11*vp+c12*vq;v2=c21*vp+c22*vq;v3=c31*vp+c32*vq;
+% Get Initial Position and Velocity from Section 2.2 of Montenbruck 
+rmag=a*(1-ecc*cos(big_e));%2.31 
+rp=a*(cos(big_e)-ecc);%2.43 magnitude to be multiplied with unit vector P
+rq=a*sqrt(1-ecc^2)*sin(big_e);%2.43 magnitude to be multiplied with unit vector Q
+vp=-sqrt(mu*a)/rmag*sin(big_e);%2.44
+vq=sqrt(mu*a*(1-ecc^2))/rmag*cos(big_e);%2.44
+c11=cos(big_omega)*cos(w)-sin(big_omega)*sin(w)*cos(inc);%P1
+c21=sin(big_omega)*cos(w)+cos(big_omega)*sin(w)*cos(inc);%P2
+c31=sin(w)*sin(inc);%P3
+c12=-cos(big_omega)*sin(w)-sin(big_omega)*cos(w)*cos(inc);%Q1
+c22=-sin(big_omega)*sin(w)+cos(big_omega)*cos(w)*cos(inc);%Q2
+c32=cos(w)*sin(inc);%q3
+r1=c11*rp+c12*rq;r2=c21*rp+c22*rq;r3=c31*rp+c32*rq;%2.43
+v1=c11*vp+c12*vq;v2=c21*vp+c22*vq;v3=c31*vp+c32*vq;%2.44
 r0=[r1;r2;r3];
 v0=[v1;v2;v3];
 
@@ -58,7 +71,7 @@ w0=[0.01;0.01;0.01];
 x(1,:)=[q0' w0'];
 
 % Get Orbit
-for i=1:m-1     
+for i=1:m-1     %Runge Kutta Interpolation to find coordinates and velocity of whole orbit
  f1=dt*orbitfun(x_pos_vel(i,:),mu);
  f2=dt*orbitfun(x_pos_vel(i,:)+0.5*f1',mu);
  f3=dt*orbitfun(x_pos_vel(i,:)+0.5*f2',mu);
@@ -76,11 +89,12 @@ gain=2*(2*pi/orb_per)*(1+sin(dip))*min_prin_mom;
 % Main Loop
 for i=1:m-1
     
- b_body=attm(x(i,1:4)')*b_eci(i,:)';b_body_n=b_body/norm(b_body);
- u(i,:)=(-gain(i)*(eye(3)-b_body_n*b_body_n')*x(i,5:7)')';
+ b_body=attm(x(i,1:4)')*b_eci(i,:)';%2.125*
+ b_body_n=b_body/norm(b_body);
+ u(i,:)=(-gain(i)*(eye(3)-b_body_n*b_body_n')*x(i,5:7)')';%Torque 7.49
  command_dipole(i,:)=(-gain(i)/norm(b_body)*cross(b_body_n,(eye(3)-b_body_n*b_body_n')*x(i,5:7)'))'*1e9;% b_body is in nT. Need to convert to T.;
  
- f1=dt*euler_quat_fun(x(i,:),in,u(i,:)');
+ f1=dt*euler_quat_fun(x(i,:),in,u(i,:)');%runge Kutta
  f2=dt*euler_quat_fun(x(i,:)+0.5*f1',in,u(i,:)');
  f3=dt*euler_quat_fun(x(i,:)+0.5*f2',in,u(i,:)');
  f4=dt*euler_quat_fun(x(i,:)+f3',in,u(i,:)');
