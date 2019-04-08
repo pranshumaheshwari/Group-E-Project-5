@@ -585,18 +585,18 @@ doy = day + 31*(mth-1) - fix(2.2+0.4*mth).*(mth>2) + (mth>2).*(~rem(yr,4));
 
 % Compute Julian Date
 jd = 2415020 + (yr-1900)*365 + fix((yr-1901)/4) + (doy-1) + 0.5 + ...
-       (3600*hr + 60*min + sec) / 86400;
+       (3600*hr + 60*min + sec) / 86400;%2.68
 
 % Compute T
 t=(jd-2451545)/36525;
 
 % Compute Sidereal Angle
-theta=(280.46061837+360.98564736629*(jd-2451545)+0.000387933*t.^2-t.^3/38710000)*pi/180;
+theta=(280.46061837+360.98564736629*(jd-2451545)+0.000387933*t.^2-t.^3/38710000)*pi/180;%2.70
 
 % Compute ECEF Components
 cost=cos(theta);sint=sin(theta);
-r_ecef(:,1)=cost.*r_eci(:,1)+sint.*r_eci(:,2);
-r_ecef(:,2)=-sint.*r_eci(:,1)+cost.*r_eci(:,2);
+r_ecef(:,1)=cost.*r_eci(:,1)+sint.*r_eci(:,2);%2.67
+r_ecef(:,2)=-sint.*r_eci(:,1)+cost.*r_eci(:,2);%2.67
 r_ecef(:,3)=r_eci(:,3);
 
 return

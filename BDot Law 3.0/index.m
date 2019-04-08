@@ -89,7 +89,7 @@ gain=2*(2*pi/orb_per)*(1+sin(dip))*min_prin_mom;
 % Main Loop
 for i=1:m-1
     
- b_body=attm(x(i,1:4)')*b_eci(i,:)';%2.125*
+ b_body=attm(x(i,1:4)')*b_eci(i,:)';%2.125(attitude matirx in DCM format then multiply this rotational matrix with magnetic field) B=AR Sec 3.3.6.2
  b_body_n=b_body/norm(b_body);
  u(i,:)=(-gain(i)*(eye(3)-b_body_n*b_body_n')*x(i,5:7)')';%Torque 7.49
  command_dipole(i,:)=(-gain(i)/norm(b_body)*cross(b_body_n,(eye(3)-b_body_n*b_body_n')*x(i,5:7)'))'*1e9;% b_body is in nT. Need to convert to T.;
